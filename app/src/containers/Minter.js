@@ -27,6 +27,13 @@ import ZooNftMarketIdl from "../idl/zoo_nft_market_solana.json";
 import * as Market from "../util/Market";
 import * as Mint from "../util/Mint";
 
+
+// const ipfs = ipfsClient.create({
+//   host: "ipfs.infura.io",
+//   port: 5001,
+//   protocol: "https",
+// });
+
 const Minter = () => {
   let navigate = useNavigate();
   const { connection } = useConnection();

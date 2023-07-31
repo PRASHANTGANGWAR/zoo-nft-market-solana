@@ -9,6 +9,7 @@ import { Route, Routes } from "react-router-dom";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import AppMenu from "../menu/AppMenu";
+import Admin from "../containers/Admin";
 
 const AppLayout = () => {
   const { connection } = useConnection();
@@ -44,6 +45,7 @@ const AppLayout = () => {
                 <Route path="/gallery" element={<Gallery />} />
                 <Route path="/detail/:metadataAddress" element={<Detail />} />
                 <Route path="/mint" element={<Minter />} />
+                <Route path="/admin" element={<Admin/>} />
               </Routes>
             )}
             {connected == false && <WrongNetwork />}

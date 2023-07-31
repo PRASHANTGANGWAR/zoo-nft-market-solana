@@ -12,7 +12,8 @@ import * as ipfsClient from "ipfs-http-client";
 import { TOKEN_METADATA_PROGRAM_ID } from "../data/Constants";
 
 const ipfs = ipfsClient.create({
-  host: "ipfs.infura.io",
+  // host: "ipfs.infura.io",
+  host:"https://mainnet.infura.io/v3/9249289e57e9472ea1889d34cb8677a1",
   port: 5001,
   protocol: "https",
 });
@@ -44,7 +45,9 @@ const getMetadata = async (
 export const uploadImageToIpfs = async (
   imageFileBuffer: Buffer
 ): Promise<String> => {
+  console.log("==================", imageFileBuffer)
   const uploadedImage = await ipfs.add(imageFileBuffer);
+  console.log("==================", uploadedImage)
 
   if (!uploadedImage) {
     return null;

@@ -14,6 +14,10 @@ const AppMenu = () => {
         Mint
         <Link to="/mint" />
       </Menu.Item>
+      <Menu.Item key="admin" icon={<PlusOutlined />}>
+        Admin
+        <Link to="/admin" />
+      </Menu.Item>
     </Menu>
   );
 };
