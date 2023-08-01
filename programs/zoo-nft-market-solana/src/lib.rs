@@ -1,69 +1,70 @@
-mod instructions;
-mod states;
-mod error;
-
 use anchor_lang::prelude::*;
-use instructions::mint::mint::*;
-use instructions::market::create_order::*;
-use instructions::market::cancel_order::*;
-use instructions::market::fill_order::*;
 
-declare_id!("D6oUwPksdxCJLdiJwUUCn6XPGsUXAsXhPdsMfiULPkLa");
+// This is your program's public key and it will update
+// automatically when you build the project.
+declare_id!("8MtwtbgExduWQo1MxQ9bJuDhSvynLYTECmPqFN6wDhLo");
 
 #[program]
-pub mod zoo_nft_market_solana {
+mod zoo_nft_market_solana {
     use super::*;
-    pub fn set_admin_address(ctx: Context<SetAdminAddress>, admin_address: Pubkey) -> Result<()> {
-        ctx.accounts.new_account.admin_fees_wallet_address = admin_address;
+
+    // Ensure that only the admin can call this function
+    pub fn set_admin_address(
+        ctx: Context<Initialize>,
+        subscription_fees_wallet_add: Pubkey,
+    ) -> Result<()> {
+        // Verify the caller is a signer (admin)
+        if !ctx.accounts.signer.is_signer {
+            return Err(ErrorCode::Unauthorized.into());
+        }
+
+        // Update the subscription_fees_wallet_add
+        ctx.accounts.new_account.subscription_fees_wallet_add = subscription_fees_wallet_add;
+        msg!(
+            "Changed wallet address to: {}!",
+            subscription_fees_wallet_add
+        ); // Message will show up in the tx logs
         Ok(())
     }
 
-    pub fn initialize(ctx: Context<Initialize>, data: u64) -> Result<()> {
-        ctx.accounts.new_account.data = data;
-        msg!("Changed data to: {}!", data); // Message will show up in the tx logs
-        Ok(())
+    // Getter function to read the value from the smart contract's state
+    pub fn get_data(ctx: Context<GetAccountData>) -> Result<Pubkey> {
+        msg!(
+            "get data: {}!",
+            ctx.accounts.new_account.subscription_fees_wallet_add
+        );
+        Ok(ctx.accounts.new_account.subscription_fees_wallet_add)
     }
+}
 
-    pub fn create_order(
-        ctx: Context<CreateOrder>,
-        memo: String,
-        price: u64
-    ) -> Result<()> {
-        instructions::market::create_order::create_order(ctx, memo, price)
-    }
-
-    pub fn cancel_order(
-        ctx: Context<CancelOrder>
-    ) -> Result<()> {
-        instructions::market::cancel_order::cancel_order(ctx)
-    }
-
-    pub fn fill_order(ctx: Context<FillOrder>) -> Result<()> {
-        instructions::market::fill_order::fill_order(ctx)
-    }
-
-
+// Error codes for custom errors
+#[error_code]
+pub enum ErrorCode {
+    #[msg("Unauthorized: Only the admin can call this function.")]
+    Unauthorized,
+}
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
-    #[account(init, payer = signer, space = 8 + 8)]
+    // We must specify the space in order to initialize an account.
+    // First 8 bytes are default account discriminator,
+    // next 32 bytes come from NewAccount.data being type Pubkey.
+    // (Pubkey = 32 bytes)
+    #[account(init, payer = signer, space = 8 + 32)]
     pub new_account: Account<'info, NewAccount>,
     #[account(mut)]
     pub signer: Signer<'info>,
     pub system_program: Program<'info, System>,
 }
 
+// Struct for the NewAccount
 #[account]
 pub struct NewAccount {
-    data: u64,
-    admin_fees_wallet_address: Pubkey, // Add a field to store the admin address
+    subscription_fees_wallet_add: Pubkey,
 }
 
 #[derive(Accounts)]
-pub struct SetAdminAddress<'info> {
+pub struct GetAccountData<'info> {
     #[account(mut)]
     pub new_account: Account<'info, NewAccount>,
-    pub admin_key: AccountInfo<'info>, // AccountInfo for the admin's public key
-    pub signer: Signer<'info>,
-}
 }
